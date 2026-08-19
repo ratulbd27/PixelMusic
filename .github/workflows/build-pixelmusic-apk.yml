@@ -38,7 +38,7 @@ jobs:
       - name: Apply stable SDK compatibility override
         run: |
           sed -i 's/compileSdk = 37/compileSdk = 36/g; s/targetSdk = 37/targetSdk = 36/g' app/build.gradle.kts shared/build.gradle.kts baselineprofile/build.gradle.kts wear/build.gradle.kts
-          sed -i 's/taglib = "1.0.6"/taglib = "1.0.5"/' gradle/libs.versions.toml
+          sed -i 's/taglib = "1.0.6"/taglib = "1.0.5"/; s/composeUi = "1.11.2"/composeUi = "1.10.4"/; s/foundation = "1.11.2"/foundation = "1.10.4"/; s/animation = "1.11.2"/animation = "1.10.4"/; s/composeBom = "2026.05.01"/composeBom = "2025.05.00"/; s/material3 = "1.5.0-alpha21"/material3 = "1.5.0-alpha15"/; s/coreKtx = "1.19.0"/coreKtx = "1.16.0"/' gradle/libs.versions.toml
 
       - name: Create local.properties
         run: |
