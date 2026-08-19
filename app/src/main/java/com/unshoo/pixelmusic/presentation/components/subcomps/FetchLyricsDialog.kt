@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.unshoo.pixelmusic.presentation.components.subcomps
 
 import androidx.compose.foundation.background
