@@ -1,0 +1,67 @@
+name: Build PixelMusic APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  build-phone-debug:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK platform 37
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-37"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Create local.properties
+        run: |
+          printf 'TELEGRAM_API_ID=0\n' > local.properties
+          printf 'TELEGRAM_API_HASH=\n' >> local.properties
+          printf 'LASTFM_API_KEY=\n' >> local.properties
+          printf 'LASTFM_SECRET=\n' >> local.properties
+
+      - name: Build phone debug APKs
+        run: |
+          ./gradlew :app:assembleDebug -Ppixelmusic.enableAbiSplits=true --no-daemon
+
+      - name: Verify APKs
+        run: |
+          BUILD_TOOLS_VERSION="$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)"
+          shopt -s nullglob
+          apks=(app/build/outputs/apk/debug/*.apk)
+          test "${#apks[@]}" -gt 0
+          for apk in "${apks[@]}"; do
+            "$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/aapt2" dump badging "$apk" >/dev/null
+            "$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/apksigner" verify --verbose "$apk"
+          done
+
+      - name: Upload phone debug APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: PixelMusic-phone-debug-apks
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
