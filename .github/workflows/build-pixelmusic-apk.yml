@@ -27,13 +27,18 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android SDK platform 37
+      - name: Install stable Android SDK platform 36
         run: |
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager --channel=1 "platforms;android-37"
+          sdkmanager "platforms;android-36"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Apply stable SDK compatibility override
+        run: |
+          sed -i 's/compileSdk = 37/compileSdk = 36/' app/build.gradle.kts
+          sed -i 's/targetSdk = 37/targetSdk = 36/' app/build.gradle.kts
 
       - name: Create local.properties
         run: |
